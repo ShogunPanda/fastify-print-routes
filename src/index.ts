@@ -7,6 +7,12 @@ interface RouteConfig {
   [key: string]: any
 }
 
+const methodsOrder = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS']
+
+function getRouteConfig(r: RouteOptions): RouteConfig {
+  return (r.config as RouteConfig) ?? {}
+}
+
 function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
   if (routes.length === 0) {
     return
@@ -16,35 +22,42 @@ function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
 
   // Sort routes
   routes = routes
-    .filter((r: RouteOptions) => (r.config as RouteConfig)?.hide !== true)
+    .filter((r: RouteOptions) => getRouteConfig(r).hide !== true)
     .sort((a: RouteOptions, b: RouteOptions) =>
       a.url !== b.url ? a.url.localeCompare(b.url) : (a.method as string).localeCompare(b.method as string)
     )
 
+  const hasDescription = routes.some((r: RouteOptions) => 'description' in getRouteConfig(r))
+
   // Build the output
-  const rows: Array<Array<string>> = [
-    [
-      styler('{{bold white}}Method(s){{-}}'),
-      styler('{{bold white}}Path{{-}}'),
-      styler('{{bold white}}Description{{-}}')
-    ]
-  ]
+  const headers = [styler('{{bold white}}Method(s){{-}}'), styler('{{bold white}}Path{{-}}')]
+
+  if (hasDescription) {
+    headers.push(styler('{{bold white}}Description{{-}}'))
+  }
+
+  const rows: Array<Array<string>> = [headers]
 
   for (const route of routes) {
     const methods = Array.isArray(route.method) ? route.method : [route.method]
 
-    rows.push([
+    const row = [
       styler(
         // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
         methods
-          .sort()
+          .sort((a: string, b: string) => methodsOrder.indexOf(a) - methodsOrder.indexOf(b))
           .map((m: string) => `{{cyan}}${m}{{-}}`)
           .join(' | ')
       ),
       // eslint-disable-next-line no-useless-escape
-      styler(`{{bold green}}${route.url.replace(/(?:\:[\w]+|\[\:\w+\])/g, '{{yellow}}$&{{-}}')}{{-}}`),
-      styler(`{{italic}}${(route.config as RouteConfig)?.description ?? ''}{{-}}`)
-    ])
+      styler(`{{bold green}}${route.url.replace(/(?:\:[\w]+|\[\:\w+\])/g, '{{yellow}}$&{{-}}')}{{-}}`)
+    ]
+
+    if (hasDescription) {
+      row.push(styler(`{{italic}}${getRouteConfig(route).description ?? ''}{{-}}`))
+    }
+
+    rows.push(row)
   }
 
   const output = table(rows, {

@@ -1,53 +1,11 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
-import fastify, { FastifyInstance, FastifyPluginOptions } from 'fastify'
+import fastify from 'fastify'
 import { SinonStub, stub } from 'sinon'
 import t from 'tap'
 import { plugin as fastifyPrintRoutes } from '../src'
 type Test = typeof t
-
-async function buildServer(options: FastifyPluginOptions = {}): Promise<FastifyInstance> {
-  const server = fastify()
-
-  server.register(fastifyPrintRoutes, options)
-
-  server.get('/abc', {
-    async handler() {
-      return { ok: true }
-    }
-  })
-
-  server.options('/abc', {
-    async handler() {
-      return { ok: true }
-    }
-  })
-
-  server.route({
-    url: '/another/:params',
-    method: ['POST', 'GET'],
-    async handler() {
-      return { ok: true }
-    },
-    config: {
-      description: 'Title'
-    }
-  })
-
-  server.route({
-    url: '/path3',
-    method: ['POST', 'GET'],
-    async handler() {
-      return { ok: true }
-    },
-    config: {
-      hide: true
-    }
-  })
-
-  return server
-}
 
 t.test('Plugin', (t: Test) => {
   let consoleStub: SinonStub
@@ -63,7 +21,44 @@ t.test('Plugin', (t: Test) => {
   })
 
   t.test('should correctly list unhidden routes with colors', async (t: Test) => {
-    const server = await buildServer()
+    const server = fastify()
+
+    server.register(fastifyPrintRoutes)
+
+    server.get('/abc', {
+      async handler() {
+        return { ok: true }
+      }
+    })
+
+    server.options('/abc', {
+      async handler() {
+        return { ok: true }
+      }
+    })
+
+    server.route({
+      url: '/another/:params',
+      method: ['POST', 'GET'],
+      async handler() {
+        return { ok: true }
+      },
+      config: {
+        description: 'Title'
+      }
+    })
+
+    server.route({
+      url: '/path3',
+      method: ['POST', 'GET'],
+      async handler() {
+        return { ok: true }
+      },
+      config: {
+        hide: true
+      }
+    })
+
     await server.listen(0)
     await server.close()
 
@@ -87,7 +82,43 @@ t.test('Plugin', (t: Test) => {
   })
 
   t.test('should correctly list unhidden routes without colors', async (t: Test) => {
-    const server = await buildServer({ useColors: false })
+    const server = fastify()
+
+    server.register(fastifyPrintRoutes, { useColors: false })
+
+    server.get('/abc', {
+      async handler() {
+        return { ok: true }
+      }
+    })
+
+    server.options('/abc', {
+      async handler() {
+        return { ok: true }
+      }
+    })
+
+    server.route({
+      url: '/another/:params',
+      method: ['POST', 'GET'],
+      async handler() {
+        return { ok: true }
+      },
+      config: {
+        description: 'Title'
+      }
+    })
+
+    server.route({
+      url: '/path3',
+      method: ['POST', 'GET'],
+      async handler() {
+        return { ok: true }
+      },
+      config: {
+        hide: true
+      }
+    })
     await server.listen(0)
     await server.close()
 
@@ -103,6 +134,63 @@ t.test('Plugin', (t: Test) => {
         ║    OPTIONS │ /abc             │             ║
         ║ GET | POST │ /another/:params │ Title       ║
         ╚════════════╧══════════════════╧═════════════╝
+      `
+        .replace(/^\s+/gm, '')
+        .replace('@', '')
+    )
+  })
+
+  t.test('should omit description column if not needed', async (t: Test) => {
+    const server = fastify()
+
+    server.register(fastifyPrintRoutes, { useColors: false })
+
+    server.get('/abc', {
+      async handler() {
+        return { ok: true }
+      }
+    })
+
+    server.options('/abc', {
+      async handler() {
+        return { ok: true }
+      }
+    })
+
+    server.route({
+      url: '/another/:params',
+      method: ['POST', 'GET'],
+      async handler() {
+        return { ok: true }
+      }
+    })
+
+    server.route({
+      url: '/path3',
+      method: ['POST', 'GET'],
+      async handler() {
+        return { ok: true }
+      },
+      config: {
+        hide: true
+      }
+    })
+
+    await server.listen(0)
+    await server.close()
+
+    t.equal(
+      consoleStub.firstCall.args[0],
+      `
+        Available routes:
+        @
+        ╔════════════╤══════════════════╗
+        ║  Method(s) │ Path             ║
+        ╟────────────┼──────────────────╢
+        ║        GET │ /abc             ║
+        ║    OPTIONS │ /abc             ║
+        ║ GET | POST │ /another/:params ║
+        ╚════════════╧══════════════════╝
       `
         .replace(/^\s+/gm, '')
         .replace('@', '')
