@@ -93,6 +93,6 @@ Server listening on port 60792 ...
 
 ## Copyright
 
-Copyright (C) 2019 and above Shogun (shogun@cowtech.it).
+Copyright (C) 2020 and above Shogun (shogun@cowtech.it).
 
 Licensed under the ISC license, which can be found at https://choosealicense.com/licenses/isc.
