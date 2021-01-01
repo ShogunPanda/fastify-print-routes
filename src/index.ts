@@ -23,9 +23,7 @@ function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
   // Sort routes
   routes = routes
     .filter((r: RouteOptions) => getRouteConfig(r).hide !== true)
-    .sort((a: RouteOptions, b: RouteOptions) =>
-      a.url !== b.url ? a.url.localeCompare(b.url) : (a.method as string).localeCompare(b.method as string)
-    )
+    .sort((a: RouteOptions, b: RouteOptions) => a.url.localeCompare(b.url))
 
   const hasDescription = routes.some((r: RouteOptions) => 'description' in getRouteConfig(r))
 
