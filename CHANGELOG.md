@@ -1,3 +1,7 @@
+### 2021-01-02 / 0.3.0
+
+- chore: Updated dependencies, code and tools.
+
 ### 2021-01-01 / 0.2.1
 
 - fix: Removed useless comparison.
