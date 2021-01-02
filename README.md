@@ -3,7 +3,7 @@
 [![Package Version](https://img.shields.io/npm/v/fastify-print-routes.svg)](https://npm.im/fastify-print-routes)
 [![Dependency Status](https://img.shields.io/david/ShogunPanda/fastify-print-routes)](https://david-dm.org/ShogunPanda/fastify-print-routes)
 [![Build](https://github.com/ShogunPanda/fastify-print-routes/workflows/CI/badge.svg)](https://github.com/ShogunPanda/fastify-print-routes/actions?query=workflow%3ACI)
-[![Code Coverage](https://img.shields.io/codecov/c/gh/ShogunPanda/fastify-print-routes?token=d0ae1643f35c4c4f9714a357f796d05d)](https://codecov.io/gh/ShogunPanda/fastify-print-routes)
+[![Code Coverage](https://img.shields.io/codecov/c/gh/ShogunPanda/fastify-print-routes?token=FQ4HHLINJ8)](https://codecov.io/gh/ShogunPanda/fastify-print-routes)
 
 A simple plugin for Fastify prints all available routes.
 
