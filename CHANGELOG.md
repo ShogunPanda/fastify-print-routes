@@ -1,3 +1,9 @@
+### 2021-01-19 / 0.4.1
+
+- chore: Added PNPM configuration.
+- chore: Use a onReady hook rather than .ready.
+- chore: Fine tuned build script.
+
 ### 2021-01-04 / 0.4.0
 
 - feat: Export as ESM.
