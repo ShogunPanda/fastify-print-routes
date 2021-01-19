@@ -66,12 +66,9 @@ export const plugin = fastifyPlugin(function (instance, options, done) {
     instance.addHook('onRoute', (route) => {
         routes.push(route);
     });
-    instance.ready((err) => {
-        /* istanbul ignore if */
-        if (err) {
-            return;
-        }
+    instance.addHook('onReady', (done) => {
         printRoutes(routes, useColors);
+        done();
     });
     done();
 }, { name: 'fastify-print-routes' });

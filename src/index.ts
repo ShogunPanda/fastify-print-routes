@@ -89,13 +89,9 @@ export const plugin = fastifyPlugin(
       routes.push(route)
     })
 
-    instance.ready((err: Error) => {
-      /* istanbul ignore if */
-      if (err) {
-        return
-      }
-
+    instance.addHook('onReady', (done: (error?: FastifyError) => void) => {
       printRoutes(routes, useColors)
+      done()
     })
 
     done()
