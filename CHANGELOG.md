@@ -1,3 +1,8 @@
+### 2021-08-16 / 1.0.0-beta.0
+
+- chore: Added missing file.
+- feat: Only export as ESM.
+
 ### 2021-01-19 / 0.4.1
 
 - chore: Added PNPM configuration.
