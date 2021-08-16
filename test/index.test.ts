@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 import fastify from 'fastify'
-import { SinonStub, stub } from 'sinon'
+import sinon, { SinonStub } from 'sinon'
 import t from 'tap'
 import { plugin as fastifyPrintRoutes } from '../src'
 type Test = typeof t
@@ -10,14 +10,12 @@ type Test = typeof t
 t.test('Plugin', (t: Test) => {
   let consoleStub: SinonStub
 
-  t.beforeEach((done: () => void) => {
-    consoleStub = stub(console, 'log')
-    done()
+  t.beforeEach(() => {
+    consoleStub = sinon.stub(console, 'log')
   })
 
-  t.afterEach((done: () => void) => {
+  t.afterEach(() => {
     consoleStub.restore()
-    done()
   })
 
   t.test('should correctly list unhidden routes with colors', async (t: Test) => {

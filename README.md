@@ -30,9 +30,12 @@ Once the server is started, it will print on the console all available routes an
 ## Example
 
 ```js
-const server = require('fastify')()
+import fastify from 'fastify'
+import fastifyPrintRoutes from 'fastify-print-routes'
 
-server.register(require('fastify-print-routes'))
+const server = fastify()
+
+server.register(fastifyPrintRoutes)
 
 server.get('/path1', {
   async handler() {
