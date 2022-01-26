@@ -21,11 +21,9 @@ function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
   const styler = useColors ? colorize : clean
 
   // Sort routes
-  routes = routes
-    .filter((r: RouteOptions) => getRouteConfig(r).hide !== true)
-    .sort((a: RouteOptions, b: RouteOptions) => a.url.localeCompare(b.url))
+  routes = routes.filter(r => getRouteConfig(r).hide !== true).sort((a, b) => a.url.localeCompare(b.url))
 
-  const hasDescription = routes.some((r: RouteOptions) => 'description' in getRouteConfig(r))
+  const hasDescription = routes.some(r => 'description' in getRouteConfig(r))
 
   // Build the output
   const headers = [styler('{{bold white}}Method(s){{-}}'), styler('{{bold white}}Path{{-}}')]
@@ -41,10 +39,9 @@ function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
 
     const row = [
       styler(
-        // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
         methods
-          .sort((a: string, b: string) => methodsOrder.indexOf(a) - methodsOrder.indexOf(b))
-          .map((m: string) => `{{cyan}}${m}{{-}}`)
+          .sort((a, b) => methodsOrder.indexOf(a) - methodsOrder.indexOf(b))
+          .map(m => `{{cyan}}${m}{{-}}`)
           .join(' | ')
       ),
       // eslint-disable-next-line no-useless-escape
@@ -85,11 +82,11 @@ export const plugin = fastifyPlugin(
     const routes: Array<RouteOptions> = []
 
     // Utility to track all the RouteOptionss we add
-    instance.addHook('onRoute', (route: RouteOptions) => {
+    instance.addHook('onRoute', route => {
       routes.push(route)
     })
 
-    instance.addHook('onReady', (done: (error?: FastifyError) => void) => {
+    instance.addHook('onReady', done => {
       printRoutes(routes, useColors)
       done()
     })

@@ -1,13 +1,13 @@
-/* eslint-disable no-useless-escape */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 import fastify from 'fastify'
 import sinon, { SinonStub } from 'sinon'
 import t from 'tap'
 import { plugin as fastifyPrintRoutes } from '../src'
-type Test = typeof t
 
-t.test('Plugin', (t: Test) => {
+function handler(): void {}
+
+t.test('Plugin', t => {
   let consoleStub: SinonStub
 
   t.beforeEach(() => {
@@ -18,29 +18,19 @@ t.test('Plugin', (t: Test) => {
     consoleStub.restore()
   })
 
-  t.test('should correctly list unhidden routes with colors', async (t: Test) => {
+  t.test('should correctly list unhidden routes with colors', async t => {
     const server = fastify()
 
     server.register(fastifyPrintRoutes)
 
-    server.get('/abc', {
-      async handler() {
-        return { ok: true }
-      }
-    })
+    server.get('/abc', { handler })
 
-    server.options('/abc', {
-      async handler() {
-        return { ok: true }
-      }
-    })
+    server.options('/abc', { handler })
 
     server.route({
       url: '/another/:params',
       method: ['POST', 'GET'],
-      async handler() {
-        return { ok: true }
-      },
+      handler,
       config: {
         description: 'Title'
       }
@@ -49,9 +39,7 @@ t.test('Plugin', (t: Test) => {
     server.route({
       url: '/path3',
       method: ['POST', 'GET'],
-      async handler() {
-        return { ok: true }
-      },
+      handler,
       config: {
         hide: true
       }
@@ -79,29 +67,19 @@ t.test('Plugin', (t: Test) => {
     )
   })
 
-  t.test('should correctly list unhidden routes without colors', async (t: Test) => {
+  t.test('should correctly list unhidden routes without colors', async t => {
     const server = fastify()
 
     server.register(fastifyPrintRoutes, { useColors: false })
 
-    server.get('/abc', {
-      async handler() {
-        return { ok: true }
-      }
-    })
+    server.get('/abc', { handler })
 
-    server.options('/abc', {
-      async handler() {
-        return { ok: true }
-      }
-    })
+    server.options('/abc', { handler })
 
     server.route({
       url: '/another/:params',
       method: ['POST', 'GET'],
-      async handler() {
-        return { ok: true }
-      },
+      handler,
       config: {
         description: 'Title'
       }
@@ -110,9 +88,7 @@ t.test('Plugin', (t: Test) => {
     server.route({
       url: '/path3',
       method: ['POST', 'GET'],
-      async handler() {
-        return { ok: true }
-      },
+      handler,
       config: {
         hide: true
       }
@@ -138,37 +114,25 @@ t.test('Plugin', (t: Test) => {
     )
   })
 
-  t.test('should omit description column if not needed', async (t: Test) => {
+  t.test('should omit description column if not needed', async t => {
     const server = fastify()
 
     server.register(fastifyPrintRoutes, { useColors: false })
 
-    server.get('/abc', {
-      async handler() {
-        return { ok: true }
-      }
-    })
+    server.get('/abc', { handler })
 
-    server.options('/abc', {
-      async handler() {
-        return { ok: true }
-      }
-    })
+    server.options('/abc', { handler })
 
     server.route({
       url: '/another/:params',
       method: ['POST', 'GET'],
-      async handler() {
-        return { ok: true }
-      }
+      handler
     })
 
     server.route({
       url: '/path3',
       method: ['POST', 'GET'],
-      async handler() {
-        return { ok: true }
-      },
+      handler,
       config: {
         hide: true
       }
@@ -195,7 +159,7 @@ t.test('Plugin', (t: Test) => {
     )
   })
 
-  t.test('should print nothing when no routes are available', async (t: Test) => {
+  t.test('should print nothing when no routes are available', async t => {
     const server = fastify()
     server.register(fastifyPrintRoutes)
     await server.listen(0)
