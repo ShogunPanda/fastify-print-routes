@@ -44,8 +44,8 @@ function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
           .map(m => `{{cyan}}${m}{{-}}`)
           .join(' | ')
       ),
-      // eslint-disable-next-line no-useless-escape
-      styler(`{{bold green}}${route.url.replace(/(?:\:[\w]+|\[\:\w+\])/g, '{{yellow}}$&{{-}}')}{{-}}`)
+
+      styler(`{{bold green}}${route.url.replace(/:\w+|\[:\w+]/g, '{{yellow}}$&{{-}}')}{{-}}`)
     ]
 
     if (hasDescription) {

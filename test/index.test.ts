@@ -3,7 +3,7 @@
 import fastify from 'fastify'
 import sinon, { SinonStub } from 'sinon'
 import t from 'tap'
-import { plugin as fastifyPrintRoutes } from '../src'
+import { plugin as fastifyPrintRoutes } from '../src/index.js'
 
 function handler(): void {}
 
@@ -50,7 +50,7 @@ t.test('Plugin', t => {
 
     t.equal(
       // eslint-disable-next-line no-control-regex
-      consoleStub.firstCall.args[0].replace(/\x1b\[\d+m/g, ''),
+      consoleStub.firstCall.args[0].replace(/\u001B\[\d+m/g, ''),
       `
         Available routes:
         @
