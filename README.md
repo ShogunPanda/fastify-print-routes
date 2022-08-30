@@ -35,7 +35,8 @@ import fastifyPrintRoutes from 'fastify-print-routes'
 
 const server = fastify()
 
-server.register(fastifyPrintRoutes)
+// Note that await is mandatory here otherwise route registrations will be lost
+await server.register(fastifyPrintRoutes)
 
 server.get('/path1', {
   async handler() {
@@ -79,6 +80,7 @@ Available routes:
 ║  Method(s) │ Path           │ Description ║
 ╟────────────┼────────────────┼─────────────╢
 ║        GET │ /path1         │             ║
+║       HEAD │ /path1         │             ║
 ║ GET | POST │ /path2/:params │ Title       ║
 ╚════════════╧════════════════╧═════════════╝
 
