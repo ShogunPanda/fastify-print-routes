@@ -41,12 +41,12 @@
     "postpublish": "git push origin && git push origin -f --tags"
   },
   "dependencies": {
-    "acquerello": "^1.0.8",
+    "acquerello": "^1.0.9",
     "fastify-plugin": "^4.2.1",
     "table": "^6.8.0"
   },
   "devDependencies": {
-    "@cowtech/eslint-config": "^8.7.1",
+    "@cowtech/eslint-config": "^8.7.2",
     "@swc/cli": "^0.1.57",
     "@swc/core": "^1.2.245",
     "@types/node": "^18.7.14",
