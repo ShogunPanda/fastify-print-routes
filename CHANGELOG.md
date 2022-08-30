@@ -1,3 +1,7 @@
+### 2022-08-30 / 2.0.2
+
+- fix: Fixed README.
+
 ### 2022-08-30 / 2.0.1
 
 - fix: Require fastify version.
