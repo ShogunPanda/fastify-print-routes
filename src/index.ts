@@ -93,7 +93,7 @@ export const plugin = fastifyPlugin(
 
     done()
   },
-  { name: 'fastify-print-routes' }
+  { name: 'fastify-print-routes', fastify: '4.x' }
 )
 
 export default plugin
