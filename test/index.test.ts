@@ -21,7 +21,7 @@ t.test('Plugin', t => {
   t.test('should correctly list unhidden routes with colors', async t => {
     const server = fastify()
 
-    server.register(fastifyPrintRoutes)
+    await server.register(fastifyPrintRoutes)
 
     server.get('/abc', { handler })
 
@@ -45,7 +45,7 @@ t.test('Plugin', t => {
       }
     })
 
-    await server.listen(0)
+    await server.listen({ port: 0 })
     await server.close()
 
     t.equal(
@@ -58,6 +58,7 @@ t.test('Plugin', t => {
         ║  Method(s) │ Path             │ Description ║
         ╟────────────┼──────────────────┼─────────────╢
         ║        GET │ /abc             │             ║
+        ║       HEAD │ /abc             │             ║
         ║    OPTIONS │ /abc             │             ║
         ║ GET | POST │ /another/:params │ Title       ║
         ╚════════════╧══════════════════╧═════════════╝
@@ -70,7 +71,7 @@ t.test('Plugin', t => {
   t.test('should correctly list unhidden routes without colors', async t => {
     const server = fastify()
 
-    server.register(fastifyPrintRoutes, { useColors: false })
+    await server.register(fastifyPrintRoutes, { useColors: false })
 
     server.get('/abc', { handler })
 
@@ -93,7 +94,7 @@ t.test('Plugin', t => {
         hide: true
       }
     })
-    await server.listen(0)
+    await server.listen({ port: 0 })
     await server.close()
 
     t.equal(
@@ -105,6 +106,7 @@ t.test('Plugin', t => {
         ║  Method(s) │ Path             │ Description ║
         ╟────────────┼──────────────────┼─────────────╢
         ║        GET │ /abc             │             ║
+        ║       HEAD │ /abc             │             ║
         ║    OPTIONS │ /abc             │             ║
         ║ GET | POST │ /another/:params │ Title       ║
         ╚════════════╧══════════════════╧═════════════╝
@@ -117,7 +119,7 @@ t.test('Plugin', t => {
   t.test('should omit description column if not needed', async t => {
     const server = fastify()
 
-    server.register(fastifyPrintRoutes, { useColors: false })
+    await server.register(fastifyPrintRoutes, { useColors: false })
 
     server.get('/abc', { handler })
 
@@ -138,7 +140,7 @@ t.test('Plugin', t => {
       }
     })
 
-    await server.listen(0)
+    await server.listen({ port: 0 })
     await server.close()
 
     t.equal(
@@ -150,6 +152,7 @@ t.test('Plugin', t => {
         ║  Method(s) │ Path             ║
         ╟────────────┼──────────────────╢
         ║        GET │ /abc             ║
+        ║       HEAD │ /abc             ║
         ║    OPTIONS │ /abc             ║
         ║ GET | POST │ /another/:params ║
         ╚════════════╧══════════════════╝
@@ -161,8 +164,9 @@ t.test('Plugin', t => {
 
   t.test('should print nothing when no routes are available', async t => {
     const server = fastify()
-    server.register(fastifyPrintRoutes)
-    await server.listen(0)
+
+    await server.register(fastifyPrintRoutes)
+    await server.listen({ port: 0 })
     await server.close()
 
     t.equal(consoleStub.callCount, 0)
