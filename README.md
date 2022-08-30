@@ -35,7 +35,14 @@ import fastifyPrintRoutes from 'fastify-print-routes'
 
 const server = fastify()
 
-// Note that await is mandatory here otherwise route registrations will be lost
+/*
+Since fastify-print-routes uses an onRoute hook, you have to either:
+
+* use `await register...`
+* wrap you routes definitions in a plugin
+
+See: https://www.fastify.io/docs/latest/Guides/Migration-Guide-V4/#synchronous-route-definitions
+*/
 await server.register(fastifyPrintRoutes)
 
 server.get('/path1', {
