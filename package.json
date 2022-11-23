@@ -1,6 +1,6 @@
 {
   "name": "fastify-print-routes",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A simple plugin for Fastify prints all available routes.",
   "homepage": "https://sw.cowtech.it/fastify-print-routes",
   "repository": "github:ShogunPanda/fastify-print-routes",
