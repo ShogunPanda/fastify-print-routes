@@ -50,7 +50,7 @@ t.test('Plugin', t => {
 
     t.equal(
       // eslint-disable-next-line no-control-regex
-      consoleStub.firstCall.args[0].replace(/\u001B\[\d+m/g, ''),
+      consoleStub.firstCall.args[0].replaceAll(/\u001B\[\d+m/g, ''),
       `
         Available routes:
         @
@@ -63,7 +63,7 @@ t.test('Plugin', t => {
         ║ GET | POST │ /another/:params │ Title       ║
         ╚════════════╧══════════════════╧═════════════╝
       `
-        .replace(/^\s+/gm, '')
+        .replaceAll(/^\s+/gm, '')
         .replace('@', '')
     )
   })
@@ -111,7 +111,7 @@ t.test('Plugin', t => {
         ║ GET | POST │ /another/:params │ Title       ║
         ╚════════════╧══════════════════╧═════════════╝
       `
-        .replace(/^\s+/gm, '')
+        .replaceAll(/^\s+/gm, '')
         .replace('@', '')
     )
   })
@@ -157,7 +157,7 @@ t.test('Plugin', t => {
         ║ GET | POST │ /another/:params ║
         ╚════════════╧══════════════════╝
       `
-        .replace(/^\s+/gm, '')
+        .replaceAll(/^\s+/gm, '')
         .replace('@', '')
     )
   })

@@ -13,7 +13,7 @@ function getRouteConfig(r: RouteOptions): RouteConfig {
   return (r.config as RouteConfig) ?? {}
 }
 
-function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
+function printRoutes(routes: RouteOptions[], useColors: boolean): void {
   if (routes.length === 0) {
     return
   }
@@ -32,7 +32,7 @@ function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
     headers.push(styler('{{bold white}}Description{{-}}'))
   }
 
-  const rows: Array<Array<string>> = [headers]
+  const rows: string[][] = [headers]
 
   for (const route of routes) {
     const methods = Array.isArray(route.method) ? route.method : [route.method]
@@ -45,7 +45,7 @@ function printRoutes(routes: Array<RouteOptions>, useColors: boolean): void {
           .join(' | ')
       ),
 
-      styler(`{{bold green}}${route.url.replace(/:\w+|\[:\w+]/g, '{{yellow}}$&{{-}}')}{{-}}`)
+      styler(`{{bold green}}${route.url.replaceAll(/:\w+|\[:\w+]/g, '{{yellow}}$&{{-}}')}{{-}}`)
     ]
 
     if (hasDescription) {
@@ -79,7 +79,7 @@ export const plugin = fastifyPlugin(
   function (instance: FastifyInstance, options: FastifyPluginOptions, done: (error?: FastifyError) => void): void {
     const useColors = options.useColors ?? true
 
-    const routes: Array<RouteOptions> = []
+    const routes: RouteOptions[] = []
 
     // Utility to track all the RouteOptionss we add
     instance.addHook('onRoute', route => {
