@@ -1,3 +1,9 @@
+### 2022-11-23 / 2.0.7
+
+- chore: Updated dependencies.
+- chore: Update package.json
+- fix: Fixed build script.
+
 ### 2022-10-12 / 2.0.6
 
 - chore: Updated dependencies.
