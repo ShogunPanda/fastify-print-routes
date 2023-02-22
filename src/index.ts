@@ -13,15 +13,55 @@ function getRouteConfig(r: RouteOptions): RouteConfig {
   return (r.config as RouteConfig) ?? {}
 }
 
-function printRoutes(routes: RouteOptions[], useColors: boolean): void {
+function sortRoutes(a: RouteOptions, b: RouteOptions): number {
+  return a.url.localeCompare(b.url)
+}
+
+function unifyRoutes(routes: RouteOptions[]): RouteOptions[] {
+  const routesMap = new Map<string, RouteOptions>()
+
+  for (const route of routes) {
+    const unifiedRoute = routesMap.get(route.url)
+
+    if (unifiedRoute) {
+      if (typeof unifiedRoute.method === 'string') {
+        unifiedRoute.method = [unifiedRoute.method]
+      }
+
+      // Unify the routes
+      if (typeof route.method === 'string') {
+        unifiedRoute.method.push(route.method)
+      } else {
+        unifiedRoute.method.push(...route.method)
+      }
+
+      // Remove the description as it is now not appropriate anymore
+      const config = unifiedRoute?.config as RouteConfig | undefined
+
+      if (config) {
+        config.description = undefined
+      }
+    } else {
+      routesMap.set(route.url, route)
+    }
+  }
+
+  return [...routesMap.values()].sort(sortRoutes)
+}
+
+function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolean): void {
   if (routes.length === 0) {
     return
   }
 
   const styler = useColors ? colorize : clean
 
-  // Sort routes
-  routes = routes.filter(r => getRouteConfig(r).hide !== true).sort((a, b) => a.url.localeCompare(b.url))
+  // Sort and eventually unify routes
+  routes = routes.filter(r => getRouteConfig(r).hide !== true).sort(sortRoutes)
+
+  if (compact) {
+    routes = unifyRoutes(routes)
+  }
 
   const hasDescription = routes.some(r => 'description' in getRouteConfig(r))
 
@@ -78,6 +118,7 @@ function printRoutes(routes: RouteOptions[], useColors: boolean): void {
 export const plugin = fastifyPlugin(
   function (instance: FastifyInstance, options: FastifyPluginOptions, done: (error?: FastifyError) => void): void {
     const useColors = options.useColors ?? true
+    const compact = options.compact ?? false
 
     const routes: RouteOptions[] = []
 
@@ -87,7 +128,7 @@ export const plugin = fastifyPlugin(
     })
 
     instance.addHook('onReady', done => {
-      printRoutes(routes, useColors)
+      printRoutes(routes, useColors, compact)
       done()
     })
 
