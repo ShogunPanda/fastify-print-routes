@@ -1,3 +1,8 @@
+### 2023-02-22 / 2.1.0
+
+- feat: Added compact option.
+- chore: CI improvement
+
 ### 2022-11-23 / 2.0.7
 
 - chore: Updated dependencies.
