@@ -1,24 +1,14 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 import fastify from 'fastify'
-import sinon, { SinonStub } from 'sinon'
 import t from 'tap'
 import { plugin as fastifyPrintRoutes } from '../src/index.js'
 
 function handler(): void {}
 
 t.test('Plugin', t => {
-  let consoleStub: SinonStub
-
-  t.beforeEach(() => {
-    consoleStub = sinon.stub(console, 'log')
-  })
-
-  t.afterEach(() => {
-    consoleStub.restore()
-  })
-
   t.test('should correctly list unhidden routes with colors', async t => {
+    const logCalls = t.capture(console, 'log')
     const server = fastify()
 
     await server.register(fastifyPrintRoutes)
@@ -50,7 +40,7 @@ t.test('Plugin', t => {
 
     t.equal(
       // eslint-disable-next-line no-control-regex
-      consoleStub.firstCall.args[0].replaceAll(/\u001B\[\d+m/g, ''),
+      logCalls()[0].args[0].replaceAll(/\u001B\[\d+m/g, ''),
       `
         Available routes:
         @
@@ -61,6 +51,7 @@ t.test('Plugin', t => {
         ║       HEAD │ /abc             │             ║
         ║    OPTIONS │ /abc             │             ║
         ║ GET | POST │ /another/:params │ Title       ║
+        ║       HEAD │ /another/:params │ Title       ║
         ╚════════════╧══════════════════╧═════════════╝
       `
         .replaceAll(/^\s+/gm, '')
@@ -69,6 +60,7 @@ t.test('Plugin', t => {
   })
 
   t.test('should correctly list unhidden routes without colors', async t => {
+    const logCalls = t.capture(console, 'log')
     const server = fastify()
 
     await server.register(fastifyPrintRoutes, { useColors: false })
@@ -98,7 +90,7 @@ t.test('Plugin', t => {
     await server.close()
 
     t.equal(
-      consoleStub.firstCall.args[0],
+      logCalls()[0].args[0],
       `
         Available routes:
         @
@@ -109,6 +101,7 @@ t.test('Plugin', t => {
         ║       HEAD │ /abc             │             ║
         ║    OPTIONS │ /abc             │             ║
         ║ GET | POST │ /another/:params │ Title       ║
+        ║       HEAD │ /another/:params │ Title       ║
         ╚════════════╧══════════════════╧═════════════╝
       `
         .replaceAll(/^\s+/gm, '')
@@ -117,6 +110,7 @@ t.test('Plugin', t => {
   })
 
   t.test('should correctly compact routes', async t => {
+    const logCalls = t.capture(console, 'log')
     const server = fastify()
 
     await server.register(fastifyPrintRoutes, { compact: true })
@@ -161,7 +155,7 @@ t.test('Plugin', t => {
 
     t.equal(
       // eslint-disable-next-line no-control-regex
-      consoleStub.firstCall.args[0].replaceAll(/\u001B\[\d+m/g, ''),
+      logCalls()[0].args[0].replaceAll(/\u001B\[\d+m/g, ''),
       `
         Available routes:
         @
@@ -169,7 +163,7 @@ t.test('Plugin', t => {
         ║            Method(s) │ Path             │ Description ║
         ╟──────────────────────┼──────────────────┼─────────────╢
         ║ GET | HEAD | OPTIONS │ /abc             │             ║
-        ║           GET | POST │ /another/:params │ Title       ║
+        ║    GET | POST | HEAD │ /another/:params │ Title       ║
         ║ GET | HEAD | OPTIONS │ /cde             │             ║
         ╚══════════════════════╧══════════════════╧═════════════╝
       `
@@ -179,6 +173,7 @@ t.test('Plugin', t => {
   })
 
   t.test('should omit description column if not needed', async t => {
+    const logCalls = t.capture(console, 'log')
     const server = fastify()
 
     await server.register(fastifyPrintRoutes, { useColors: false })
@@ -206,7 +201,7 @@ t.test('Plugin', t => {
     await server.close()
 
     t.equal(
-      consoleStub.firstCall.args[0],
+      logCalls()[0].args[0],
       `
         Available routes:
         @
@@ -217,6 +212,7 @@ t.test('Plugin', t => {
         ║       HEAD │ /abc             ║
         ║    OPTIONS │ /abc             ║
         ║ GET | POST │ /another/:params ║
+        ║       HEAD │ /another/:params ║
         ╚════════════╧══════════════════╝
       `
         .replaceAll(/^\s+/gm, '')
@@ -225,13 +221,14 @@ t.test('Plugin', t => {
   })
 
   t.test('should print nothing when no routes are available', async t => {
+    const logCalls = t.capture(console, 'log')
     const server = fastify()
 
     await server.register(fastifyPrintRoutes)
     await server.listen({ port: 0 })
     await server.close()
 
-    t.equal(consoleStub.callCount, 0)
+    t.equal(logCalls().length, 0)
   })
 
   t.end()

@@ -1,11 +1,9 @@
 import { clean, colorize } from 'acquerello'
-import { FastifyError, FastifyInstance, FastifyPluginOptions, RouteOptions } from 'fastify'
+import { type FastifyError, type FastifyInstance, type FastifyPluginOptions, type RouteOptions } from 'fastify'
 import fastifyPlugin from 'fastify-plugin'
 import { table } from 'table'
 
-interface RouteConfig {
-  [key: string]: any
-}
+type RouteConfig = Record<string, any>
 
 const methodsOrder = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS']
 
@@ -35,10 +33,10 @@ function unifyRoutes(routes: RouteOptions[]): RouteOptions[] {
         unifiedRoute.method.push(...route.method)
       }
 
-      // Remove the description as it is now not appropriate anymore
+      // Remove the description when they don't match
       const config = unifiedRoute?.config as RouteConfig | undefined
 
-      if (config) {
+      if (config && config?.description !== (route.config as RouteConfig)?.description) {
         config.description = undefined
       }
     } else {
