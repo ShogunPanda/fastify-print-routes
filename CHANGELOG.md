@@ -1,3 +1,8 @@
+### 2023-10-23 / 2.2.0
+
+- chore: Updated dependencies and toolchain.
+- chore: Fixed compilation.
+
 ### 2023-02-22 / 2.1.0
 
 - feat: Added compact option.
