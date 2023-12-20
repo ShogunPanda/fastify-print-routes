@@ -115,8 +115,8 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
 
 export const plugin = fastifyPlugin(
   function (instance: FastifyInstance, options: FastifyPluginOptions, done: (error?: FastifyError) => void): void {
-    const useColors = options.useColors ?? true
-    const compact = options.compact ?? false
+    const useColors: boolean = options.useColors ?? true
+    const compact: boolean = options.compact ?? false
 
     const routes: RouteOptions[] = []
 
