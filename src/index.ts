@@ -3,6 +3,11 @@ import { type FastifyError, type FastifyInstance, type FastifyPluginOptions, typ
 import fastifyPlugin from 'fastify-plugin'
 import { table } from 'table'
 
+interface Schema {
+  properties: Record<string, unknown>
+  required: string[]
+}
+
 type RouteConfig = Record<string, any>
 
 const methodsOrder = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS']
@@ -55,7 +60,9 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
   const styler = useColors ? colorize : clean
 
   // Sort and eventually unify routes
+  /* c8 ignore start */
   routes = routes.filter(r => getRouteConfig(r).hide !== true).sort(sortRoutes)
+  /* c8 ignore end */
 
   if (compact) {
     routes = unifyRoutes(routes)
@@ -75,6 +82,27 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
   for (const route of routes) {
     const methods = Array.isArray(route.method) ? route.method : [route.method]
 
+    const url = route.url.replaceAll(/:\w+|\[:\w+]/g, '{{yellow}}$&{{-}}')
+    const querystring = []
+
+    if (route.schema?.querystring) {
+      // Get all properties
+      const schema = route.schema.querystring as Schema
+      const requiredProperties = schema.required ?? []
+
+      for (const property of Object.keys(schema.properties) ?? {}) {
+        const param = `${property}={{yellow}}value{{-}}`
+        const separator: string = querystring.length === 0 ? '?' : '&'
+
+        if (requiredProperties.includes(property)) {
+          querystring.push(separator + param)
+        } else {
+          querystring.push(`${separator}(${param})`)
+        }
+      }
+    }
+
+    const query = querystring.join('').replaceAll('&(', '(&').replaceAll(')&', '&)').replaceAll(')(&', '&)(')
     const row = [
       styler(
         methods
@@ -82,8 +110,7 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
           .map(m => `{{cyan}}${m}{{-}}`)
           .join(' | ')
       ),
-
-      styler(`{{bold green}}${route.url.replaceAll(/:\w+|\[:\w+]/g, '{{yellow}}$&{{-}}')}{{-}}`)
+      styler(`{{bold green}}${url}${query}{{-}}`)
     ]
 
     if (hasDescription) {
