@@ -1,3 +1,9 @@
+### 2024-02-06 / 3.1.0
+
+- chore: Replace tap with Node test runner.
+- feat: Added filter option.
+- feat: Include querystring in the URL.
+
 ### 2024-01-27 / 3.0.2
 
 - chore: Updated dependencies.
