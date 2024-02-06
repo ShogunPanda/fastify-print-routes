@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 import fastify, { type RouteOptions } from 'fastify'
-import { strictEqual } from 'node:assert'
+import { deepStrictEqual } from 'node:assert'
 import { test, type MockedObject, type TestContext } from 'node:test'
 import { table } from 'table'
 import { plugin as fastifyPrintRoutes } from '../src/index.js'
@@ -68,7 +68,7 @@ test('should correctly list unhidden routes with colors', async t => {
   await server.listen({ port: 0 })
   await server.close()
 
-  strictEqual(
+  deepStrictEqual(
     // eslint-disable-next-line no-control-regex
     logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
     generateOutput([
@@ -176,7 +176,7 @@ test('should correctly include querystring in the URL if present', async t => {
   await server.listen({ port: 0 })
   await server.close()
 
-  strictEqual(
+  deepStrictEqual(
     // eslint-disable-next-line no-control-regex
     logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
     generateOutput(
@@ -221,7 +221,7 @@ test('should correctly list unhidden routes without colors', async t => {
   await server.listen({ port: 0 })
   await server.close()
 
-  strictEqual(
+  deepStrictEqual(
     logCalls.mock.calls[0].arguments[0],
     generateOutput([
       ['GET', '/abc', ''],
@@ -273,7 +273,7 @@ test('should correctly list filtered routes without colors', async t => {
   await server.listen({ port: 0 })
   await server.close()
 
-  strictEqual(
+  deepStrictEqual(
     logCalls.mock.calls[0].arguments[0],
     generateOutput([
       ['GET', '/abc', 'Title'],
@@ -327,7 +327,7 @@ test('should correctly compact routes', async t => {
   await server.listen({ port: 0 })
   await server.close()
 
-  strictEqual(
+  deepStrictEqual(
     // eslint-disable-next-line no-control-regex
     logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
     generateOutput([
@@ -366,7 +366,7 @@ test('should omit description column if not needed', async t => {
   await server.listen({ port: 0 })
   await server.close()
 
-  strictEqual(
+  deepStrictEqual(
     logCalls.mock.calls[0].arguments[0],
     generateOutput(
       [
@@ -389,5 +389,5 @@ test('should print nothing when no routes are available', async t => {
   await server.listen({ port: 0 })
   await server.close()
 
-  strictEqual(logCalls.mock.callCount(), 0)
+  deepStrictEqual(logCalls.mock.callCount(), 0)
 })
