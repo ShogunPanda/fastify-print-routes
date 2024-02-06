@@ -62,9 +62,7 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
   const styler = useColors ? colorize : clean
 
   // Sort and eventually unify routes
-  /* c8 ignore start */
   routes = routes.filter(r => getRouteConfig(r).hide !== true && filter(r)).sort(sortRoutes)
-  /* c8 ignore end */
 
   if (compact) {
     routes = unifyRoutes(routes)

@@ -1,11 +1,19 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 import fastify, { type RouteOptions } from 'fastify'
+import { strictEqual } from 'node:assert'
+import { test, type MockedObject, type TestContext } from 'node:test'
 import { table } from 'table'
-import t from 'tap'
 import { plugin as fastifyPrintRoutes } from '../src/index.js'
 
 function handler(): void {}
+
+function mockConsole(t: TestContext): MockedObject {
+  const fn = t.mock.method(console, 'log')
+  fn.mock.mockImplementation(() => {})
+
+  return fn
+}
 
 function generateOutput(rows: string[][], header: string[] = ['Method(s)', 'Path', 'Description']): string {
   return (
@@ -29,361 +37,357 @@ function generateOutput(rows: string[][], header: string[] = ['Method(s)', 'Path
   )
 }
 
-t.test('Plugin', t => {
-  t.test('should correctly list unhidden routes with colors', async t => {
-    const logCalls = t.capture(console, 'log')
-    const server = fastify()
+test('should correctly list unhidden routes with colors', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
 
-    await server.register(fastifyPrintRoutes)
+  await server.register(fastifyPrintRoutes)
 
-    server.get('/abc', { handler })
+  server.get('/abc', { handler })
 
-    server.options('/abc', { handler })
+  server.options('/abc', { handler })
 
-    server.route({
-      url: '/another/:params',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        description: 'Title'
-      }
-    })
-
-    server.route({
-      url: '/path3',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        hide: true
-      }
-    })
-
-    await server.listen({ port: 0 })
-    await server.close()
-
-    t.equal(
-      // eslint-disable-next-line no-control-regex
-      logCalls()[0].args[0].replaceAll(/\u001B\[\d+m/g, ''),
-      generateOutput([
-        ['GET', '/abc', ''],
-        ['HEAD', '/abc', ''],
-        ['OPTIONS', '/abc', ''],
-        ['GET | POST', '/another/:params', 'Title'],
-        ['HEAD', '/another/:params', 'Title']
-      ])
-    )
+  server.route({
+    url: '/another/:params',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      description: 'Title'
+    }
   })
 
-  t.test('should correctly include querystring in the URL if present', async t => {
-    const logCalls = t.capture(console, 'log')
-    const server = fastify()
+  server.route({
+    url: '/path3',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      hide: true
+    }
+  })
 
-    await server.register(fastifyPrintRoutes, { compact: true })
+  await server.listen({ port: 0 })
+  await server.close()
 
-    server.route({
-      url: '/first',
-      method: ['GET'],
-      handler,
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'string'
-            },
-            bar: {
-              type: 'integer'
-            }
+  strictEqual(
+    // eslint-disable-next-line no-control-regex
+    logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
+    generateOutput([
+      ['GET', '/abc', ''],
+      ['HEAD', '/abc', ''],
+      ['OPTIONS', '/abc', ''],
+      ['GET | POST', '/another/:params', 'Title'],
+      ['HEAD', '/another/:params', 'Title']
+    ])
+  )
+})
+
+test('should correctly include querystring in the URL if present', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
+
+  await server.register(fastifyPrintRoutes, { compact: true })
+
+  server.route({
+    url: '/first',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
           },
-          required: ['foo']
-        }
+          bar: {
+            type: 'integer'
+          }
+        },
+        required: ['foo']
       }
-    })
+    }
+  })
 
-    server.route({
-      url: '/second',
-      method: ['GET'],
-      handler,
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'string'
-            },
-            bar: {
-              type: 'integer'
-            }
+  server.route({
+    url: '/second',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
           },
-          required: ['bar']
-        }
+          bar: {
+            type: 'integer'
+          }
+        },
+        required: ['bar']
       }
-    })
+    }
+  })
 
-    server.route({
-      url: '/third',
-      method: ['GET'],
-      handler,
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'string'
-            },
-            bar: {
-              type: 'integer'
-            },
-            baz: {
-              type: 'integer'
-            }
+  server.route({
+    url: '/third',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
           },
-          required: ['bar']
-        }
-      }
-    })
-
-    server.route({
-      url: '/fourth',
-      method: ['GET'],
-      handler,
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'string'
-            },
-            bar: {
-              type: 'integer'
-            },
-            baz: {
-              type: 'integer'
-            }
+          bar: {
+            type: 'integer'
           },
-          required: ['baz']
-        }
+          baz: {
+            type: 'integer'
+          }
+        },
+        required: ['bar']
       }
-    })
+    }
+  })
 
-    await server.listen({ port: 0 })
-    await server.close()
+  server.route({
+    url: '/fourth',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          },
+          baz: {
+            type: 'integer'
+          }
+        },
+        required: ['baz']
+      }
+    }
+  })
 
-    t.equal(
-      // eslint-disable-next-line no-control-regex
-      logCalls()[0].args[0].replaceAll(/\u001B\[\d+m/g, ''),
-      generateOutput(
-        [
-          ['GET | HEAD', '/first?foo=value(&bar=value)'],
-          ['GET | HEAD', '/fourth?(foo=value&)(bar=value&)baz=value'],
-          ['GET | HEAD', '/second?(foo=value&)bar=value'],
-          ['GET | HEAD', '/third?(foo=value&)bar=value(&baz=value)']
-        ],
-        ['Method(s)', 'Path']
-      )
+  await server.listen({ port: 0 })
+  await server.close()
+
+  strictEqual(
+    // eslint-disable-next-line no-control-regex
+    logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
+    generateOutput(
+      [
+        ['GET | HEAD', '/first?foo=value(&bar=value)'],
+        ['GET | HEAD', '/fourth?(foo=value&)(bar=value&)baz=value'],
+        ['GET | HEAD', '/second?(foo=value&)bar=value'],
+        ['GET | HEAD', '/third?(foo=value&)bar=value(&baz=value)']
+      ],
+      ['Method(s)', 'Path']
     )
+  )
+})
+
+test('should correctly list unhidden routes without colors', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
+
+  await server.register(fastifyPrintRoutes, { useColors: false })
+
+  server.get('/abc', { handler })
+
+  server.options('/abc', { handler })
+
+  server.route({
+    url: '/another/:params',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      description: 'Title'
+    }
   })
 
-  t.test('should correctly list unhidden routes without colors', async t => {
-    const logCalls = t.capture(console, 'log')
-    const server = fastify()
+  server.route({
+    url: '/path3',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      hide: true
+    }
+  })
+  await server.listen({ port: 0 })
+  await server.close()
 
-    await server.register(fastifyPrintRoutes, { useColors: false })
+  strictEqual(
+    logCalls.mock.calls[0].arguments[0],
+    generateOutput([
+      ['GET', '/abc', ''],
+      ['HEAD', '/abc', ''],
+      ['OPTIONS', '/abc', ''],
+      ['GET | POST', '/another/:params', 'Title'],
+      ['HEAD', '/another/:params', 'Title']
+    ])
+  )
+})
 
-    server.get('/abc', { handler })
+test('should correctly list filtered routes without colors', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
 
-    server.options('/abc', { handler })
+  await server.register(fastifyPrintRoutes, {
+    useColors: false,
+    filter(route: RouteOptions): boolean {
+      return route.url === '/abc'
+    }
+  })
 
-    server.route({
-      url: '/another/:params',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        description: 'Title'
-      }
-    })
+  server.get('/abc', {
+    handler,
+    config: {
+      description: 'Title'
+    }
+  })
 
-    server.route({
-      url: '/path3',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        hide: true
-      }
-    })
-    await server.listen({ port: 0 })
-    await server.close()
+  server.options('/abc', { handler })
 
-    t.equal(
-      logCalls()[0].args[0],
-      generateOutput([
-        ['GET', '/abc', ''],
-        ['HEAD', '/abc', ''],
-        ['OPTIONS', '/abc', ''],
-        ['GET | POST', '/another/:params', 'Title'],
-        ['HEAD', '/another/:params', 'Title']
-      ])
+  server.route({
+    url: '/another/:params',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      description: 'Title'
+    }
+  })
+
+  server.route({
+    url: '/path3',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      hide: true
+    }
+  })
+  await server.listen({ port: 0 })
+  await server.close()
+
+  strictEqual(
+    logCalls.mock.calls[0].arguments[0],
+    generateOutput([
+      ['GET', '/abc', 'Title'],
+      ['HEAD', '/abc', 'Title'],
+      ['OPTIONS', '/abc', '']
+    ])
+  )
+})
+
+test('should correctly compact routes', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
+
+  await server.register(fastifyPrintRoutes, { compact: true })
+
+  server.get('/abc', {
+    handler,
+    config: {
+      description: 'Another title'
+    }
+  })
+
+  server.options('/abc', { handler })
+
+  server.get('/cde', { handler })
+
+  server.route({
+    url: '/cde',
+    method: ['OPTIONS'],
+    handler
+  })
+
+  server.route({
+    url: '/another/:params',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      description: 'Title'
+    }
+  })
+
+  server.route({
+    url: '/path3',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      hide: true
+    }
+  })
+
+  await server.listen({ port: 0 })
+  await server.close()
+
+  strictEqual(
+    // eslint-disable-next-line no-control-regex
+    logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
+    generateOutput([
+      ['GET | HEAD | OPTIONS', '/abc', ''],
+      ['GET | POST | HEAD', '/another/:params', 'Title'],
+      ['GET | HEAD | OPTIONS', '/cde', '']
+    ])
+  )
+})
+
+test('should omit description column if not needed', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
+
+  await server.register(fastifyPrintRoutes, { useColors: false })
+
+  server.get('/abc', { handler })
+
+  server.options('/abc', { handler })
+
+  server.route({
+    url: '/another/:params',
+    method: ['POST', 'GET'],
+    handler
+  })
+
+  server.route({
+    url: '/path3',
+    method: ['POST', 'GET'],
+    handler,
+    config: {
+      hide: true
+    }
+  })
+
+  await server.listen({ port: 0 })
+  await server.close()
+
+  strictEqual(
+    logCalls.mock.calls[0].arguments[0],
+    generateOutput(
+      [
+        ['GET', '/abc'],
+        ['HEAD', '/abc'],
+        ['OPTIONS', '/abc'],
+        ['GET | POST', '/another/:params'],
+        ['HEAD', '/another/:params']
+      ],
+      ['Method(s)', 'Path']
     )
-  })
+  )
+})
 
-  t.test('should correctly list filtered routes without colors', async t => {
-    const logCalls = t.capture(console, 'log')
-    const server = fastify()
+test('should print nothing when no routes are available', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
 
-    await server.register(fastifyPrintRoutes, {
-      useColors: false,
-      filter(route: RouteOptions): boolean {
-        return route.url === '/abc'
-      }
-    })
+  await server.register(fastifyPrintRoutes)
+  await server.listen({ port: 0 })
+  await server.close()
 
-    server.get('/abc', {
-      handler,
-      config: {
-        description: 'Title'
-      }
-    })
-
-    server.options('/abc', { handler })
-
-    server.route({
-      url: '/another/:params',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        description: 'Title'
-      }
-    })
-
-    server.route({
-      url: '/path3',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        hide: true
-      }
-    })
-    await server.listen({ port: 0 })
-    await server.close()
-
-    t.equal(
-      logCalls()[0].args[0],
-      generateOutput([
-        ['GET', '/abc', 'Title'],
-        ['HEAD', '/abc', 'Title'],
-        ['OPTIONS', '/abc', '']
-      ])
-    )
-  })
-
-  t.test('should correctly compact routes', async t => {
-    const logCalls = t.capture(console, 'log')
-    const server = fastify()
-
-    await server.register(fastifyPrintRoutes, { compact: true })
-
-    server.get('/abc', {
-      handler,
-      config: {
-        description: 'Another title'
-      }
-    })
-
-    server.options('/abc', { handler })
-
-    server.get('/cde', { handler })
-
-    server.route({
-      url: '/cde',
-      method: ['OPTIONS'],
-      handler
-    })
-
-    server.route({
-      url: '/another/:params',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        description: 'Title'
-      }
-    })
-
-    server.route({
-      url: '/path3',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        hide: true
-      }
-    })
-
-    await server.listen({ port: 0 })
-    await server.close()
-
-    t.equal(
-      // eslint-disable-next-line no-control-regex
-      logCalls()[0].args[0].replaceAll(/\u001B\[\d+m/g, ''),
-      generateOutput([
-        ['GET | HEAD | OPTIONS', '/abc', ''],
-        ['GET | POST | HEAD', '/another/:params', 'Title'],
-        ['GET | HEAD | OPTIONS', '/cde', '']
-      ])
-    )
-  })
-
-  t.test('should omit description column if not needed', async t => {
-    const logCalls = t.capture(console, 'log')
-    const server = fastify()
-
-    await server.register(fastifyPrintRoutes, { useColors: false })
-
-    server.get('/abc', { handler })
-
-    server.options('/abc', { handler })
-
-    server.route({
-      url: '/another/:params',
-      method: ['POST', 'GET'],
-      handler
-    })
-
-    server.route({
-      url: '/path3',
-      method: ['POST', 'GET'],
-      handler,
-      config: {
-        hide: true
-      }
-    })
-
-    await server.listen({ port: 0 })
-    await server.close()
-
-    t.equal(
-      logCalls()[0].args[0],
-      generateOutput(
-        [
-          ['GET', '/abc'],
-          ['HEAD', '/abc'],
-          ['OPTIONS', '/abc'],
-          ['GET | POST', '/another/:params'],
-          ['HEAD', '/another/:params']
-        ],
-        ['Method(s)', 'Path']
-      )
-    )
-  })
-
-  t.test('should print nothing when no routes are available', async t => {
-    const logCalls = t.capture(console, 'log')
-    const server = fastify()
-
-    await server.register(fastifyPrintRoutes)
-    await server.listen({ port: 0 })
-    await server.close()
-
-    t.equal(logCalls().length, 0)
-  })
-
-  t.end()
+  strictEqual(logCalls.mock.callCount(), 0)
 })
