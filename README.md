@@ -23,8 +23,9 @@ Register as a plugin as early as possible, optional providing any of the followi
 
 - `useColors`: If to use colors to highlight routes.
 - `compact`: If to show all routes of the same path in a single line even if they are defined using different handlers. Descripion of unified routes will not be printed.
+- `filter`: If provided, a function that receives a route and should return a boolean to determine if the route should be print or not.
 
-Routes can be omitted by the list by setting `hide` option to `true` inside their `config`.
+Routes can also be omitted by the list by setting `hide` option to `true` inside their `config`.
 
 Once the server is started, it will print on the console all available routes and methods.
 

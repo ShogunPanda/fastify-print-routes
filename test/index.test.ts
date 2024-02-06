@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
-import fastify from 'fastify'
+import fastify, { type RouteOptions } from 'fastify'
 import { table } from 'table'
 import t from 'tap'
 import { plugin as fastifyPrintRoutes } from '../src/index.js'
@@ -222,6 +222,56 @@ t.test('Plugin', t => {
         ['OPTIONS', '/abc', ''],
         ['GET | POST', '/another/:params', 'Title'],
         ['HEAD', '/another/:params', 'Title']
+      ])
+    )
+  })
+
+  t.test('should correctly list filtered routes without colors', async t => {
+    const logCalls = t.capture(console, 'log')
+    const server = fastify()
+
+    await server.register(fastifyPrintRoutes, {
+      useColors: false,
+      filter(route: RouteOptions): boolean {
+        return route.url === '/abc'
+      }
+    })
+
+    server.get('/abc', {
+      handler,
+      config: {
+        description: 'Title'
+      }
+    })
+
+    server.options('/abc', { handler })
+
+    server.route({
+      url: '/another/:params',
+      method: ['POST', 'GET'],
+      handler,
+      config: {
+        description: 'Title'
+      }
+    })
+
+    server.route({
+      url: '/path3',
+      method: ['POST', 'GET'],
+      handler,
+      config: {
+        hide: true
+      }
+    })
+    await server.listen({ port: 0 })
+    await server.close()
+
+    t.equal(
+      logCalls()[0].args[0],
+      generateOutput([
+        ['GET', '/abc', 'Title'],
+        ['HEAD', '/abc', 'Title'],
+        ['OPTIONS', '/abc', '']
       ])
     )
   })

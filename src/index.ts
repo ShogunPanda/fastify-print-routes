@@ -3,12 +3,14 @@ import { type FastifyError, type FastifyInstance, type FastifyPluginOptions, typ
 import fastifyPlugin from 'fastify-plugin'
 import { table } from 'table'
 
+type RouteConfig = Record<string, any>
+
+type RouteFilter = (route: RouteOptions) => boolean
+
 interface Schema {
   properties: Record<string, unknown>
   required: string[]
 }
-
-type RouteConfig = Record<string, any>
 
 const methodsOrder = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS']
 
@@ -52,7 +54,7 @@ function unifyRoutes(routes: RouteOptions[]): RouteOptions[] {
   return [...routesMap.values()].sort(sortRoutes)
 }
 
-function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolean): void {
+function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolean, filter: RouteFilter): void {
   if (routes.length === 0) {
     return
   }
@@ -61,7 +63,7 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
 
   // Sort and eventually unify routes
   /* c8 ignore start */
-  routes = routes.filter(r => getRouteConfig(r).hide !== true).sort(sortRoutes)
+  routes = routes.filter(r => getRouteConfig(r).hide !== true && filter(r)).sort(sortRoutes)
   /* c8 ignore end */
 
   if (compact) {
@@ -144,6 +146,7 @@ export const plugin = fastifyPlugin(
   function (instance: FastifyInstance, options: FastifyPluginOptions, done: (error?: FastifyError) => void): void {
     const useColors: boolean = options.useColors ?? true
     const compact: boolean = options.compact ?? false
+    const filter: RouteFilter = options.filter ?? (() => true)
 
     const routes: RouteOptions[] = []
 
@@ -153,7 +156,7 @@ export const plugin = fastifyPlugin(
     })
 
     instance.addHook('onReady', done => {
-      printRoutes(routes, useColors, compact)
+      printRoutes(routes, useColors, compact, filter)
       done()
     })
 
