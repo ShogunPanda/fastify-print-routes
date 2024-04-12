@@ -1,3 +1,9 @@
+### 2024-04-12 / 3.2.0
+
+- chore: Updated dependencies.
+- feat: Add querystring option.
+- chore: Added missing dependency.
+
 ### 2024-02-07 / 3.1.1
 
 - chore: Updated dependencies.
