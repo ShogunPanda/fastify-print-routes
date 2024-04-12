@@ -191,6 +191,116 @@ test('should correctly include querystring in the URL if present', async t => {
   )
 })
 
+test('should correctly skip querystring in the URLs if asked to', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
+
+  await server.register(fastifyPrintRoutes, { compact: true, querystring: false })
+
+  server.route({
+    url: '/first',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          }
+        },
+        required: ['foo']
+      }
+    }
+  })
+
+  server.route({
+    url: '/second',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          }
+        },
+        required: ['bar']
+      }
+    }
+  })
+
+  server.route({
+    url: '/third',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          },
+          baz: {
+            type: 'integer'
+          }
+        },
+        required: ['bar']
+      }
+    }
+  })
+
+  server.route({
+    url: '/fourth',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          },
+          baz: {
+            type: 'integer'
+          }
+        },
+        required: ['baz']
+      }
+    }
+  })
+
+  await server.listen({ port: 0 })
+  await server.close()
+
+  deepStrictEqual(
+    // eslint-disable-next-line no-control-regex
+    logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
+    generateOutput(
+      [
+        ['GET | HEAD', '/first'],
+        ['GET | HEAD', '/fourth'],
+        ['GET | HEAD', '/second'],
+        ['GET | HEAD', '/third']
+      ],
+      ['Method(s)', 'Path']
+    )
+  )
+})
+
 test('should correctly list unhidden routes without colors', async t => {
   const logCalls = mockConsole(t)
   const server = fastify()

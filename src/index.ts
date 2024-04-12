@@ -54,7 +54,13 @@ function unifyRoutes(routes: RouteOptions[]): RouteOptions[] {
   return [...routesMap.values()].sort(sortRoutes)
 }
 
-function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolean, filter: RouteFilter): void {
+function printRoutes(
+  routes: RouteOptions[],
+  useColors: boolean,
+  compact: boolean,
+  filter: RouteFilter,
+  showQueryString: boolean
+): void {
   if (routes.length === 0) {
     return
   }
@@ -83,26 +89,35 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
     const methods = Array.isArray(route.method) ? route.method : [route.method]
 
     const url = route.url.replaceAll(/:\w+|\[:\w+]/g, '{{yellow}}$&{{-}}')
-    const querystring = []
+    const querystringComponents = []
 
-    if (route.schema?.querystring) {
-      // Get all properties
-      const schema = route.schema.querystring as Schema
-      const requiredProperties = schema.required ?? []
+    let queryString = ''
 
-      for (const property of Object.keys(schema.properties) ?? {}) {
-        const param = `${property}={{yellow}}value{{-}}`
-        const separator: string = querystring.length === 0 ? '?' : '&'
+    if (showQueryString) {
+      if (route.schema?.querystring) {
+        // Get all properties
+        const schema = route.schema.querystring as Schema
+        const requiredProperties = schema.required ?? []
 
-        if (requiredProperties.includes(property)) {
-          querystring.push(separator + param)
-        } else {
-          querystring.push(`${separator}(${param})`)
+        for (const property of Object.keys(schema.properties) ?? {}) {
+          const param = `${property}={{yellow}}value{{-}}`
+          const separator: string = querystringComponents.length === 0 ? '?' : '&'
+
+          if (requiredProperties.includes(property)) {
+            querystringComponents.push(separator + param)
+          } else {
+            querystringComponents.push(`${separator}(${param})`)
+          }
         }
       }
+
+      queryString = querystringComponents
+        .join('')
+        .replaceAll('&(', '(&')
+        .replaceAll(')&', '&)')
+        .replaceAll(')(&', '&)(')
     }
 
-    const query = querystring.join('').replaceAll('&(', '(&').replaceAll(')&', '&)').replaceAll(')(&', '&)(')
     const row = [
       styler(
         methods
@@ -110,7 +125,7 @@ function printRoutes(routes: RouteOptions[], useColors: boolean, compact: boolea
           .map(m => `{{cyan}}${m}{{-}}`)
           .join(' | ')
       ),
-      styler(`{{bold green}}${url}${query}{{-}}`)
+      styler(`{{bold green}}${url}${queryString}{{-}}`)
     ]
 
     if (hasDescription) {
@@ -145,6 +160,7 @@ export const plugin = fastifyPlugin(
     const useColors: boolean = options.useColors ?? true
     const compact: boolean = options.compact ?? false
     const filter: RouteFilter = options.filter ?? (() => true)
+    const querystring: boolean = options.querystring ?? true
 
     const routes: RouteOptions[] = []
 
@@ -154,7 +170,7 @@ export const plugin = fastifyPlugin(
     })
 
     instance.addHook('onReady', done => {
-      printRoutes(routes, useColors, compact, filter)
+      printRoutes(routes, useColors, compact, filter, querystring)
       done()
     })
 
