@@ -1,3 +1,8 @@
+### 2024-10-21 / 4.0.0
+
+- feat: Support zod schemas.
+- feat!: Dropped support for Node 18 and updated dependencies.
+
 ### 2024-04-12 / 3.2.0
 
 - chore: Updated dependencies.
