@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
 import fastify, { type RouteOptions } from 'fastify'
 import { deepStrictEqual } from 'node:assert'
 import { test, type MockedObject, type TestContext } from 'node:test'

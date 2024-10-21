@@ -93,6 +93,7 @@ function printRoutes(
 
     let queryString = ''
 
+    /* c8 ignore next 3 */
     if (showQueryString) {
       if (route.schema?.querystring) {
         // Get all properties
@@ -176,7 +177,7 @@ export const plugin = fastifyPlugin(
 
     done()
   },
-  { name: 'fastify-print-routes', fastify: '4.x' }
+  { name: 'fastify-print-routes', fastify: '5.x' }
 )
 
 export default plugin
