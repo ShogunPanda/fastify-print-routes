@@ -1,7 +1,9 @@
 import fastify, { type RouteOptions } from 'fastify'
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import { deepStrictEqual } from 'node:assert'
 import { test, type MockedObject, type TestContext } from 'node:test'
 import { table } from 'table'
+import { number, object, string } from 'zod'
 import { plugin as fastifyPrintRoutes } from '../src/index.js'
 
 function handler(): void {}
@@ -168,6 +170,82 @@ test('should correctly include querystring in the URL if present', async t => {
         },
         required: ['baz']
       }
+    }
+  })
+
+  await server.listen({ port: 0 })
+  await server.close()
+
+  deepStrictEqual(
+    // eslint-disable-next-line no-control-regex
+    logCalls.mock.calls[0].arguments[0].replaceAll(/\u001B\[\d+m/g, ''),
+    generateOutput(
+      [
+        ['GET | HEAD', '/first?foo=value(&bar=value)'],
+        ['GET | HEAD', '/fourth?(foo=value&)(bar=value&)baz=value'],
+        ['GET | HEAD', '/second?(foo=value&)bar=value'],
+        ['GET | HEAD', '/third?(foo=value&)bar=value(&baz=value)']
+      ],
+      ['Method(s)', 'Path']
+    )
+  )
+})
+
+test('should correctly support Zod', async t => {
+  const logCalls = mockConsole(t)
+  const server = fastify()
+
+  await server.register(fastifyPrintRoutes, { compact: true })
+  server.setValidatorCompiler(validatorCompiler)
+  server.setSerializerCompiler(serializerCompiler)
+
+  server.route({
+    url: '/first',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: object({
+        foo: string(),
+        bar: number()
+      }).partial({ bar: true })
+    }
+  })
+
+  server.route({
+    url: '/second',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: object({
+        foo: string(),
+        bar: number()
+      }).partial({ foo: true })
+    }
+  })
+
+  server.route({
+    url: '/third',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: object({
+        foo: string(),
+        bar: number(),
+        baz: number()
+      }).partial({ foo: true, baz: true })
+    }
+  })
+
+  server.route({
+    url: '/fourth',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: object({
+        foo: string(),
+        bar: number(),
+        baz: number()
+      }).partial({ foo: true, bar: true })
     }
   })
 
