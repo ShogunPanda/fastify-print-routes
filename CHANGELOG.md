@@ -1,3 +1,7 @@
+### 2024-12-28 / 4.0.1
+
+- chore: Updated dependencies.
+
 ### 2024-10-21 / 4.0.0
 
 - feat: Support zod schemas.
