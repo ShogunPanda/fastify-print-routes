@@ -1,3 +1,7 @@
+### 2025-03-09 / 4.1.0
+
+- feat: Added decorator.
+
 ### 2024-12-28 / 4.0.1
 
 - chore: Updated dependencies.
