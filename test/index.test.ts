@@ -577,3 +577,260 @@ test('should print nothing when no routes are available', async t => {
 
   deepStrictEqual(logCalls.mock.callCount(), 0)
 })
+
+test('should expose routes via decorator', async t => {
+  const server = fastify()
+
+  await server.register(fastifyPrintRoutes, { compact: true })
+
+  server.route({
+    url: '/first',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          }
+        },
+        required: ['foo']
+      }
+    }
+  })
+
+  server.route({
+    url: '/second',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          }
+        },
+        required: ['bar']
+      }
+    }
+  })
+
+  server.route({
+    url: '/third',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          },
+          baz: {
+            type: 'integer'
+          }
+        },
+        required: ['bar']
+      }
+    }
+  })
+
+  server.route({
+    url: '/fourth',
+    method: ['GET'],
+    handler,
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          bar: {
+            type: 'integer'
+          },
+          baz: {
+            type: 'integer'
+          }
+        },
+        required: ['baz']
+      }
+    }
+  })
+
+  const routes = server.routes.map(r => {
+    const { method, schema, url } = r
+
+    return { method, schema, url }
+  })
+
+  deepStrictEqual(routes, [
+    {
+      method: ['GET'],
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['foo'],
+          type: 'object'
+        }
+      },
+      url: '/first'
+    },
+    {
+      method: 'HEAD',
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['foo'],
+          type: 'object'
+        }
+      },
+      url: '/first'
+    },
+    {
+      method: ['GET'],
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['bar'],
+          type: 'object'
+        }
+      },
+      url: '/second'
+    },
+    {
+      method: 'HEAD',
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['bar'],
+          type: 'object'
+        }
+      },
+      url: '/second'
+    },
+    {
+      method: ['GET'],
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            baz: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['bar'],
+          type: 'object'
+        }
+      },
+      url: '/third'
+    },
+    {
+      method: 'HEAD',
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            baz: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['bar'],
+          type: 'object'
+        }
+      },
+      url: '/third'
+    },
+    {
+      method: ['GET'],
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            baz: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['baz'],
+          type: 'object'
+        }
+      },
+      url: '/fourth'
+    },
+    {
+      method: 'HEAD',
+      schema: {
+        querystring: {
+          properties: {
+            bar: {
+              type: 'integer'
+            },
+            baz: {
+              type: 'integer'
+            },
+            foo: {
+              type: 'string'
+            }
+          },
+          required: ['baz'],
+          type: 'object'
+        }
+      },
+      url: '/fourth'
+    }
+  ])
+})

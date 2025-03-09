@@ -9,6 +9,14 @@ type RouteConfig = Record<string, any>
 
 type RouteFilter = (route: RouteOptions) => boolean
 
+// using declaration merging, add your plugin props to the appropriate fastify interfaces
+// if prop type is defined here, the value will be typechecked when you call decorate{,Request,Reply}
+declare module 'fastify' {
+  interface FastifyInstance {
+    routes: RouteOptions[]
+  }
+}
+
 interface Schema {
   properties: Record<string, unknown>
   required: string[]
@@ -182,6 +190,8 @@ export const plugin = fastifyPlugin(
       printRoutes(routes, useColors, compact, filter, querystring)
       done()
     })
+
+    instance.decorate('routes', routes)
 
     done()
   },
