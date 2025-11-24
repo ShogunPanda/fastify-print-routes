@@ -3,8 +3,8 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { deepStrictEqual } from 'node:assert'
 import { test, type MockedObject, type TestContext } from 'node:test'
 import { table } from 'table'
-import { number, object, string } from 'zod'
-import { plugin as fastifyPrintRoutes } from '../src/index.js'
+import { number, object, string } from 'zod/v4'
+import { plugin as fastifyPrintRoutes } from '../src/index.ts'
 
 function handler(): void {}
 

@@ -2,8 +2,7 @@ import { clean, colorize } from 'acquerello'
 import { type FastifyError, type FastifyInstance, type FastifyPluginOptions, type RouteOptions } from 'fastify'
 import fastifyPlugin from 'fastify-plugin'
 import { table } from 'table'
-import { ZodObject } from 'zod'
-import { zodToJsonSchema } from 'zod-to-json-schema'
+import { toJSONSchema, ZodObject } from 'zod'
 
 type RouteConfig = Record<string, any>
 
@@ -111,12 +110,12 @@ function printRoutes(
 
         /* c8 ignore next 5 */
         if (schema instanceof ZodObject) {
-          schema = zodToJsonSchema(schema, { target: 'openApi3', $refStrategy: 'none' }) as Schema
+          schema = toJSONSchema(schema) as Schema
         }
 
         const requiredProperties = schema.required ?? []
 
-        for (const property of Object.keys(schema.properties) ?? {}) {
+        for (const property of Object.keys(schema.properties)) {
           const param = `${property}={{yellow}}value{{-}}`
           const separator: string = querystringComponents.length === 0 ? '?' : '&'
 
