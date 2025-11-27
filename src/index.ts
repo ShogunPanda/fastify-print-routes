@@ -1,5 +1,5 @@
+import type { FastifyError, FastifyInstance, FastifyPluginOptions, RouteOptions } from 'fastify'
 import { clean, colorize } from 'acquerello'
-import { type FastifyError, type FastifyInstance, type FastifyPluginOptions, type RouteOptions } from 'fastify'
 import fastifyPlugin from 'fastify-plugin'
 import { table } from 'table'
 import { toJSONSchema, ZodObject } from 'zod'
